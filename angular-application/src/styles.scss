@@ -1,0 +1,11 @@
+/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css?family=DM+Serif+Display&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Bree+Serif&display=swap');
+
+.card {
+    margin-top: 1rem;
+}
+
+.card-title, .modal-title {
+    font-family: 'Bree Serif', serif;
+}

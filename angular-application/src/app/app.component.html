@@ -1,0 +1,80 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<!--Navbar-->
+<mdb-navbar SideClass="navbar navbar-expand-lg navbar-dark stylish-color-dark">
+
+  <!-- Navbar brand -->
+  <mdb-navbar-brand><a class="navbar-brand" href="#" style="font-family: 'Bree Serif', serif;">{{title}}</a></mdb-navbar-brand>
+
+  <!-- Collapsible content -->
+  <links>
+
+      <!-- Links -->
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item dropdown" dropdown>
+          <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light" mdbWavesEffect>
+          Novice<span class="caret"></span></a>
+          <div *dropdownMenu class="dropdown-menu dropdown dropdown-primary" role="menu">
+              <a class="dropdown-item waves-light" mdbWavesEffect href="#">Novice</a>
+              <div class="divider dropdown-divider"></div>
+              <a class="dropdown-item waves-light" mdbWavesEffect href="#">Domače</a>
+              <a class="dropdown-item waves-light" mdbWavesEffect href="#">Tujina</a>
+              <a class="dropdown-item waves-light" mdbWavesEffect href="#">Politika</a>
+          </div>
+      </li>
+          <!-- Dropdown -->
+          <li class="nav-item dropdown" dropdown>
+            <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light" mdbWavesEffect>
+            Gospodarstvo<span class="caret"></span></a>
+            <div *dropdownMenu class="dropdown-menu dropdown dropdown-primary" role="menu">
+                <a class="dropdown-item waves-light" mdbWavesEffect href="#">Gospodarstvo</a>
+                <div class="divider dropdown-divider"></div>
+            </div>
+        </li>
+          <!-- Dropdown -->
+          <li class="nav-item dropdown" dropdown>
+            <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light" mdbWavesEffect>
+            Šport<span class="caret"></span></a>
+            <div *dropdownMenu class="dropdown-menu dropdown dropdown-primary" role="menu">
+                <a class="dropdown-item waves-light" mdbWavesEffect href="#">Šport</a>
+                <div class="divider dropdown-divider"></div>
+                <a class="dropdown-item waves-light" mdbWavesEffect href="#">Nogomet</a>
+                <a class="dropdown-item waves-light" mdbWavesEffect href="#">Košarka</a>
+                <a class="dropdown-item waves-light" mdbWavesEffect href="#">Kolesarstvo</a>
+                <a class="dropdown-item waves-light" mdbWavesEffect href="#">Ostalo</a>
+            </div>
+        </li>
+
+          <!-- Dropdown -->
+          <li class="nav-item dropdown" dropdown>
+              <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light" mdbWavesEffect>
+              Kultura<span class="caret"></span></a>
+              <div *dropdownMenu class="dropdown-menu dropdown dropdown-primary" role="menu">
+                  <a class="dropdown-item waves-light" mdbWavesEffect href="#">Kultura</a>
+                  <div class="divider dropdown-divider"></div>
+              </div>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link waves-light" mdbWavesEffect>Znanost in tehnologija</a>
+        </li>
+
+          <li class="nav-item">
+            <a class="nav-link waves-light" mdbWavesEffect>Ostalo</a>
+        </li>
+
+      </ul>
+      <!-- Links -->
+
+<!-- Search form -->
+      <form class="form-inline waves-light" mdbWavesEffect>
+          <div class="md-form my-0">
+              <input class="form-control mr-sm-2" type="text" placeholder="Iskanje">
+          </div>
+      </form>
+  </links>
+  <!-- Collapsible content -->
+
+</mdb-navbar>
+<!--/.Navbar-->
+
+<router-outlet></router-outlet>
