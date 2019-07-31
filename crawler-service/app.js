@@ -44,10 +44,9 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// Checking sources
 sourcesController.runChecks();
 setInterval(function() {
   sourcesController.runChecks();
-}, 2*60*1000);
+}, 5*60*1000);
 
 module.exports = app;
