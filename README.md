@@ -1,13 +1,6 @@
-Node.js v10.16.0
+# Crawler Service (JavaScript)
 
-# Crawler Service
+# Aggregation Service (Python 3.7)
 
-Python
+# Angular Application (TypeScript 3.2.4)
 
-# Aggregation Service
-
-JavaScript
-
-# Angular Application
-
-TypeScript
