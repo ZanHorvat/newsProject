@@ -1,5 +1,10 @@
 import threading
 import pymongo
+import nltk
+import lemmagen.lemmatizer
+from lemmagen.lemmatizer import Lemmatizer
+
+
 
 
 def setInterval(func, time):
@@ -22,5 +27,10 @@ def foo():
 
 
 # using
-foo()
-setInterval(foo, 10 * 10 * 6000)
+# foo()
+# setInterval(foo, 10 * 10 * 6000)
+
+lemmatizer = Lemmatizer(dictionary=lemmagen.DICTIONARY_SLOVENE)
+print(lemmatizer.lemmatize("Boštjana"))
+
+

@@ -48,26 +48,25 @@ visitUrls = async function(source, summary_location, content_location, comments_
     await page.goto(url);
     await timeout(10000);
 
-    var element = await page.$(category_location);
+    var element = category_location != "" ? await page.$(category_location) : null;
     
     var category = null;
     
-    if(element == null) {
+    if(element == null || category_location == "") {
       category = feed.items[i].category;
     } else {
       category = await page.evaluate(element => element.innerText, element);
     }
-    
 
     var element = await page.$(summary_location);
     var summary = await page.evaluate(element => element.innerText, element);
-
+    
     var element = await page.$(content_location);
     var content = await page.evaluate(element => element.innerText, element);
-
+    
     var element = await page.$(comments_location);
     var comments = await page.evaluate(element => element.innerText, element);
-    
+    /*
     console.log('#' + feed.items[i].title + '#');
     console.log();
     console.log(summary.trim());
@@ -76,7 +75,17 @@ visitUrls = async function(source, summary_location, content_location, comments_
     console.log();
     console.log(comments.trim());
     console.log(category.trim());
-    console.log('========');
+    console.log('========'); */
+
+    articleController.evalArticle(
+      {
+        source: url,
+        title: feed.items[i].title,
+        summary: summary.trim(),
+        content: content.trim(),
+        category: category.trim(),
+      }
+    );
 
     await promise;
   }
