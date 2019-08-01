@@ -1,17 +1,19 @@
 var mongoose = require('mongoose');
 var Article = mongoose.model('Article');
 
-module.exports.evalArticle = function(article) {
+module.exports.evalArticle = function(source,article) {
+
+    console.log(source+': '+article.title);
+
     Article.find(
-        {source: article.source}, 
+        {link: article.link}, 
         function (err, docs) {
             if(err){
                 console.log(err)
             } else {
                 if(docs.length > 0){
-                    console.log("Already exits")
+                    console.log("Already exists.\n")
                 } else {
-                    console.log("Wanted to insert");
                     createArticle(article);
                 }
             }
@@ -24,7 +26,7 @@ createArticle = function(article) {
         if (err) {
           console.log(err)
         } else {
-          console.log('Success');
+          console.log('Article added\n');
         }
     });
 }
