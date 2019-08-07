@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit } from '@angular/core';
 import { MainController } from "../controllers/MainController";
 
 @Component({
@@ -11,7 +11,7 @@ export class MainView implements OnInit {
   articles = []
 
   ngOnInit() {
-    this.mMainController.getArticles().subscribe(aArticles => this.articles = aArticles);
+    
   }
 
 
