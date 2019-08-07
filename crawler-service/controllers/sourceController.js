@@ -1,11 +1,15 @@
 var mongoose = require("mongoose");
 var Article = mongoose.model("Article");
+var Source = mongoose.model("Source");
 var Parser = require("rss-parser");
 var puppeteer = require("puppeteer");
 var articleController = require("./articleController");
 
 
 module.exports.runChecks = async function(article) {
+ 
+  //
+
   // Check Delo
   await visitUrls("https://www.delo.si/rss/",  ".itemSubtitle",".itemFullText", "._50f7", ""); 
 
@@ -34,6 +38,7 @@ async function timeout(ms) {
  * @param {*} category_location 
  */
 async function visitUrls(source, summary_location, content_location, comments_location, category_location){
+  
   var parser = new Parser();
   var feed = await parser.parseURL(source);
 
@@ -120,7 +125,7 @@ async function prepareContent(source, article_rss, page, content_location){
       if (element != null) { content_location = ".itemFullText > .preview_text"}
       break
     default:
-      
+
   }
 
   var element = await page.$(content_location);

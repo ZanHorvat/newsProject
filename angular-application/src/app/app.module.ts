@@ -4,12 +4,14 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
+import { HttpClientModule } from '@angular/common/http';
+
 // Custom
 import { MDBBootstrapModule } from 'angular-bootstrap-md';
 
 // Views
 import { MainView } from './views/MainView';
-import { MainController } from './controllers/mainController';
+import { MainController } from './controllers/MainController';
 
 
 @NgModule({
@@ -20,7 +22,8 @@ import { MainController } from './controllers/mainController';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    MDBBootstrapModule.forRoot()
+    MDBBootstrapModule.forRoot(),
+    HttpClientModule
   ],
   providers: [
     MainController,

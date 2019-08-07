@@ -6,7 +6,13 @@ import { MainController } from "../controllers/MainController";
   templateUrl: "./MainView.html"
 })
 export class MainView implements OnInit {
-  constructor() {}
+  constructor(private mMainController: MainController) {}
 
-  ngOnInit() {}
+  articles = []
+
+  ngOnInit() {
+    this.mMainController.getArticles().subscribe(aArticles => this.articles = aArticles);
+  }
+
+
 }

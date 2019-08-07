@@ -17,3 +17,4 @@ mongoose.connection.on('disconnected', function() {
 });
 
 require('./article');
+require('./source');

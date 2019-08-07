@@ -17,6 +17,15 @@
               Knovs je končal pogovor z načelnico Generalštaba Slovenske vojske
               (SV) <strong>Alenko Ermenc</strong>
             </p>
+            test
+<li *ngFor="let article of articles" class="list-group-item list-group-item-warning">
+  <strong>{{article}}</strong>
+  <div class="float-right">
+    <button class="btn btn-outline-dark btn-sm p-1" (click)='prikaziFormoZaUpdateTodo(todo)'><i class="far fa-edit"></i></button>
+    <button class="btn btn-outline-danger btn-sm p-1" (click)='potrdi_brisanje_vnosa_v_todo(todo)'><i class="far fa-trash-alt"></i></button>
+  </div>
+  
+</li>
             <hr class="hr-light" />
             <!-- Link -->
             <a href="#!" class="white-text d-flex justify-content-end"
@@ -267,6 +276,7 @@
     </div>
   </div>
 </div>
+
 
 <div
   mdbModal
