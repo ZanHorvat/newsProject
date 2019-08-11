@@ -8,18 +8,24 @@ var articleController = require("./articleController");
 
 module.exports.runChecks = async function(article) {
  
-  //
+// Check Rtvslo
+await visitUrls("https://stari.rtvslo.si/feeds/00.xml", ".lead", ".article-body", ".numComments", "#main-container > div.news-container.red-dark.article-type-1 > div > header > div.section-heading.red-dark > h3 > a");
 
-  // Check Delo
-  await visitUrls("https://www.delo.si/rss/",  ".itemSubtitle",".itemFullText", "._50f7", ""); 
-
-  // Check Rtvslo
-  await visitUrls("https://stari.rtvslo.si/feeds/00.xml", ".lead", ".article-body", ".numComments", ".section-title");
+   // Check Delo
+   await visitUrls("https://www.delo.si/rss/",  ".itemSubtitle",".itemFullText", "._50f7", "#t3-content > div.container.break_cont.break_00_cont.outter_cont.item_break_00 > div > div > div > ul > li:nth-child(3) > span"); 
 
   // Check 24ur
-  await visitUrls("https://www.24ur.com/rss", ".article__summary", ".article__body-dynamic", ".article__details-main", ".article__label");
-};
+  await visitUrls("https://www.24ur.com/rss", ".article__summary", ".article__body-dynamic", ".article__details-main", "div.label.article__label");
 
+  // Check Siol
+
+  await visitUrls("https://siol.net/feeds/latest", "body > div.body_wrap > div > div:nth-child(3) > div.grid-12.no-gutter.gutter-lg.gutter-xlg.article__wrap > div.column_content > div > article > div.article__body--content.js_articleBodyContent > div.article__intro.js_articleIntro > p", "body > div.body_wrap > div > div:nth-child(3) > div.grid-12.no-gutter.gutter-lg.gutter-xlg.article__wrap > div.column_content > div > article > div.article__body--content.js_articleBodyContent > div.article__main.js_article.js_bannerInArticleWrap", "body > div.body_wrap > div > div:nth-child(3) > div.grid-12.no-gutter.gutter-lg.gutter-xlg.article__wrap > div.column_content > div > article > div.article__additional > div.article__comments.js_articleComments.cf > div > div.comments__heading_wrap.cf > span > i", "body > div.body_wrap > div > div:nth-child(3) > div.grid-12.no-gutter.gutter-lg.gutter-xlg.article__wrap > div.article__breadcrumbs > a:nth-child(3)")
+ 
+
+  
+
+  
+};
 
 /**
  * 
@@ -46,7 +52,7 @@ async function visitUrls(source, summary_location, content_location, comments_lo
   var page = await browser.newPage();
 
   for (let i = 0; i < feed.items.length; i++) {
-    await inspectArticlePage(page, feed.items[i], source, summary_location, content_location, comments_location, category_location);
+    await inspectArticlePage(page, feed.items[i], source, summary_location, content_location, category_location).catch(err => console.log(err));
   }
   browser.close();
 }
@@ -68,6 +74,8 @@ async function visitUrls(source, summary_location, content_location, comments_lo
   await page.goto(article_rss.link);
   await timeout(10000);
   
+  var pubDate = new Date(article_rss.pubDate);
+
   var link = await prepareLink(source, article_rss, page)
   var title = await prepareTitle(source, article_rss, page);
   var summary = await prepareSummary(source, article_rss, page, summary_location);
@@ -81,12 +89,10 @@ async function visitUrls(source, summary_location, content_location, comments_lo
     content.length > 0 &&
     category.length > 0
   ) {
-    addNewArticle(source, link, title, summary, content, category);
+    addNewArticle(source, link, title, summary, content, category, pubDate);
   }
   await promise;
 }
-
-
 
 async function prepareLink(source, article_rss, page){
   return article_rss.link;
@@ -125,16 +131,11 @@ async function prepareContent(source, article_rss, page, content_location){
       if (element != null) { content_location = ".itemFullText > .preview_text"}
       break
     default:
-
   }
 
   var element = await page.$(content_location);
       var content = await page.evaluate(element => element != null ? element.innerText.trim() : '', element);
       content = cleanString(content);
-    
-
-  
-  
   return content;
 }
 
@@ -171,7 +172,7 @@ async function prepareCategory(source, article_rss, page, category_location){
  * @param {*} content 
  * @param {*} category 
  */
-async function addNewArticle(source, link, title, summary, content, category){
+async function addNewArticle(source, link, title, summary, content, category, pubDate){
   articleController.evalArticle(source,
     {
       link: link,
@@ -179,6 +180,7 @@ async function addNewArticle(source, link, title, summary, content, category){
       summary: summary,
       content: content,
       category: category,
+      updated: pubDate
     }
   );
 }

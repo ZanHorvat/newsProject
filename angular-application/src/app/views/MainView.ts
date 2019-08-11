@@ -1,7 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from "@angular/core";
 import { MainController } from "../controllers/MainController";
-import { debounceTime, distinctUntilChanged, switchMap, map } from 'rxjs/operators';
-import { Article } from '../models/Article';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  map
+} from "rxjs/operators";
+import { Article } from "../models/Article";
 
 @Component({
   selector: "MainView",
@@ -16,9 +21,22 @@ export class MainView implements OnInit {
     this.loadArticles();
   }
 
-  loadArticles(){
-    return this.mMainController.articles$.subscribe((data:{}) => {
+  loadArticles() {
+    return this.mMainController.articles$.subscribe((data: {}) => {
       this.Articles = data;
     });
+  }
+
+  getColor(category: String) {
+    2;
+
+    category = category.toLowerCase();
+
+    console.log(category);
+
+    switch (category) {
+      default:
+        return 'grey';
+    }
   }
 }

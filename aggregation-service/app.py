@@ -74,7 +74,7 @@ def foo():
 
     for y in range(0, size) :
         for x in range(0, size):
-            if cosine[y][x] > 0.6:
+            if cosine[y][x] > 0.5:
                 print(articles_whole[x].get("title") + " " + articles_whole[x].get("link") + ' ['+str(cosine[y][x])+']')
         print("\n")
 

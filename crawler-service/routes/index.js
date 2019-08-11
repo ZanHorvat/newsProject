@@ -13,7 +13,7 @@ router.get("/", function(req, res, next) {
         res.status(200);
         res.json(docs);
     }
-  }).limit(20);
+  }).sort([['updated', -1]]);
 });
 
 module.exports = router;

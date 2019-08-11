@@ -1,38 +1,39 @@
 <div>
   <div class="container mb-4">
-    <div class="row">
-      <div *ngFor="let article of Articles;" class="col-md-4">
-        <!-- Card Dark -->
-        <div class="card">
-          <!-- Card content -->
-          <div class="card-body blue darken-2 white-text rounded-bottom">
-            <!-- Title -->
-            <h4 class="card-title">
-              {{article.title}}
-            </h4>
-            <hr class="hr-light" />
-            <!-- Text -->
-            <p class="card-text white-text mb-4">
-              {{article.summary | slice:0:128}}
-            </p>
-            <hr class="hr-light" />
-            <!-- Link -->
-            <a href="{{article.link}}" class="white-text d-flex justify-content-end"
-              ><small>{{article.link}}</small>
+    <div class="card-columns">
+      <!-- Card Dark -->
+      <div *ngFor="let article of Articles" class="card">
+        <!-- Card content -->
+        <div class="card-body" [ngClass]="getColor(article.category)">
+          <!-- Title -->
+          <h4 class="card-title">
+            {{ article.title }}
+          </h4>
+          <hr class="hr" />
+          <!-- Text -->
+          <p class="card-text mb-4">
+            {{ article.summary }}
+          </p>
+          <hr class="hr" />
+          <!-- Link -->
+          <p class="card-text mb-4">
+            <a href="{{ article.link }}" class="black-text"
+              ><small>{{ article.link }}</small>
             </a>
-            <a href="#!" class="white-text d-flex justify-content-start"
+          </p>
+          <p class="card-text mb-4">
+            <a href="#!" (click)="basicModal.show()" class="black-text d-flex"
               ><small style="padding: 0.2rem"
                 ><i class="fa fa-angle-double-right"></i></small
               >ostali viri
             </a>
-          </div>
+          </p>
         </div>
         <!-- Card Dark -->
       </div>
     </div>
   </div>
 </div>
-
 
 <div
   mdbModal
@@ -57,7 +58,8 @@
         <h4 class="modal-title w-100" id="myModalLabel">Politika</h4>
       </div>
       <div class="modal-body">
-        <a target="_blank"
+        <a
+          target="_blank"
           href="https://www.delo.si/novice/slovenija/ermenceva-si-zeli-da-bi-pripadniki-sv-za-ugovore-uporabljali-sluzbeno-pot-204237.html"
           ><h4 class="modal-title w-100 black-text" id="myModalLabel">
             Ermenčeva si želi, da bi pripadniki SV za ugovore uporabljali
@@ -71,7 +73,8 @@
         <a href="#!" class="black-text d-flex justify-content-end">@delo.si</a>
         <div style="color: rgba(0, 0, 0, 0.5)">
           <hr class="hr-dark" />
-          <a target="_blank"
+          <a
+            target="_blank"
             href="https://www.rtvslo.si/slovenija/nacelnica-si-zeli-da-bi-pripadniki-sv-za-ugovore-uporabljali-sluzbeno-pot/493988"
             ><h5 class="black-text">
               <strong>
@@ -91,7 +94,8 @@
             ><small>@rtvslo.si</small>
           </a>
           <hr class="hr-dark" />
-          <a target="_blank"
+          <a
+            target="_blank"
             href="https://www.24ur.com/novice/slovenija/ermenceva-si-zeli-da-bi-pripadniki-sv-za-ugovore-uporabljali-sluzbeno-pot.html"
             ><h5 class="black-text">
               <strong
