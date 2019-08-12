@@ -11,6 +11,7 @@ var usersRouter = require('./routes/users');
 var sourcesRouter = require('./routes/sources');
 
 var sourcesController = require('./controllers/sourceController');
+var articleController = require('./controllers/articleController');
 
 var app = express();
 
@@ -57,6 +58,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+/* articleController.readArticles(); */
 sourcesController.runChecks();
 setInterval(function() {
   sourcesController.runChecks();
