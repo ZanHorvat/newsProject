@@ -5,43 +5,15 @@ var Parser = require("rss-parser");
 var puppeteer = require("puppeteer");
 var articleController = require("./articleController");
 var categoryDict = require("../dictionaries/categories");
+var sourcesDict = require("../dictionaries/sources");
 
 module.exports.runChecks = async function(article) {
   // Check Rtvslo
-  await visitUrls(
-    "https://stari.rtvslo.si/feeds/00.xml",
-    ".lead",
-    ".article-body",
-    ".numComments",
-    "#main-container > div > div > header > div > h3"
-  );
 
-  // Check Delo
-  await visitUrls(
-    "https://www.delo.si/rss/",
-    ".itemSubtitle",
-    ".itemFullText",
-    "._50f7",
-    "#t3-content > div.container.break_cont.break_00_cont.outter_cont.item_break_00 > div > div > div > ul > li:nth-child(3) > span"
-  );
-
-  // Check 24ur
-  await visitUrls(
-    "https://www.24ur.com/rss",
-    ".article__summary",
-    ".article__body-dynamic",
-    ".article__details-main",
-    "div.label.article__label"
-  );
-
-  // Check Siol
-  await visitUrls(
-    "https://siol.net/feeds/latest",
-    "body > div.body_wrap > div > div:nth-child(3) > div.grid-12.no-gutter.gutter-lg.gutter-xlg.article__wrap > div.column_content > div > article > div.article__body--content.js_articleBodyContent > div.article__intro.js_articleIntro > p",
-    "body > div.body_wrap > div > div:nth-child(3) > div.grid-12.no-gutter.gutter-lg.gutter-xlg.article__wrap > div.column_content > div > article > div.article__body--content.js_articleBodyContent > div.article__main.js_article.js_bannerInArticleWrap",
-    "body > div.body_wrap > div > div:nth-child(3) > div.grid-12.no-gutter.gutter-lg.gutter-xlg.article__wrap > div.column_content > div > article > div.article__additional > div.article__comments.js_articleComments.cf > div > div.comments__heading_wrap.cf > span > i",
-    "body > div.body_wrap > div > div:nth-child(3) > div.grid-12.no-gutter.gutter-lg.gutter-xlg.article__wrap > div.article__breadcrumbs > a:nth-child(3)"
-  );
+  for(var source in sourcesDict.sources){
+    var objSource = sourcesDict.sources[source]
+    await visitUrls(objSource.source, objSource.summary_selector, objSource.content_selector, objSource.comments_selector, objSource.category_selector);
+  }
 };
 
 /**
@@ -131,7 +103,7 @@ async function inspectArticlePage(
     page,
     category_location
   );
-
+  console.log('trying to add');
   if (
     link.length > 0 &&
     title.length > 0 &&

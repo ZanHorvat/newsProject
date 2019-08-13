@@ -12,6 +12,7 @@ import { MDBBootstrapModule } from 'angular-bootstrap-md';
 import { MainView } from './views/MainView';
 import { MainController } from './controllers/MainController';
 
+import { AngularFontAwesomeModule } from 'angular-font-awesome';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { MainController } from './controllers/MainController';
     BrowserModule,
     AppRoutingModule,
     MDBBootstrapModule.forRoot(),
-    HttpClientModule
+    HttpClientModule,
+    AngularFontAwesomeModule
   ],
   providers: [
     MainController,
