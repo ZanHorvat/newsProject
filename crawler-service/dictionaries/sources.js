@@ -1,6 +1,7 @@
 module.exports.sources = {
     'rtvslo.si': {
         source: 'https://stari.rtvslo.si/feeds/00.xml',
+        title_selector: 'header > h1',
         summary_selector: '.lead',
         content_selector: '.article-body',
         comments_selector: '.numComments',
@@ -8,6 +9,7 @@ module.exports.sources = {
     }, 
     'delo.si': {
         source: 'https://www.delo.si/rss/',
+        title_selector: '.col--itemtitle > h1',
         summary_selector: '.itemSubtitle',
         content_selector: '.itemFullText',
         comments_selector: '._50f7',
@@ -15,6 +17,7 @@ module.exports.sources = {
     },
     '24ur.com': {
         source: 'https://www.24ur.com/rss',
+        title_selector: 'div.article__header > h1',
         summary_selector: '.article__summary',
         content_selector: '.article__body-dynamic',
         comments_selector: '.article__details-main',
@@ -22,6 +25,7 @@ module.exports.sources = {
     },
     'siol.net': {
         source: 'https://siol.net/feeds/latest',
+        title_selector: '.article__title',
         summary_selector: 'body > div.body_wrap > div > div:nth-child(3) > div.grid-12.no-gutter.gutter-lg.gutter-xlg.article__wrap > div.column_content > div > article > div.article__body--content.js_articleBodyContent > div.article__intro.js_articleIntro > p',
         content_selector: 'body > div.body_wrap > div > div:nth-child(3) > div.grid-12.no-gutter.gutter-lg.gutter-xlg.article__wrap > div.column_content > div > article > div.article__body--content.js_articleBodyContent > div.article__main.js_article.js_bannerInArticleWrap',
         comments_selector: 'body > div.body_wrap > div > div:nth-child(3) > div.grid-12.no-gutter.gutter-lg.gutter-xlg.article__wrap > div.column_content > div > article > div.article__additional > div.article__comments.js_articleComments.cf > div > div.comments__heading_wrap.cf > span > i',

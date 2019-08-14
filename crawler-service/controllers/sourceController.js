@@ -10,9 +10,16 @@ var sourcesDict = require("../dictionaries/sources");
 module.exports.runChecks = async function(article) {
   // Check Rtvslo
 
-  for(var source in sourcesDict.sources){
-    var objSource = sourcesDict.sources[source]
-    await visitUrls(objSource.source, objSource.summary_selector, objSource.content_selector, objSource.comments_selector, objSource.category_selector);
+  for (var source in sourcesDict.sources) {
+    var objSource = sourcesDict.sources[source];
+    await visitUrls(
+      objSource.source,
+      objSource.title_selector,
+      objSource.summary_selector,
+      objSource.content_selector,
+      objSource.comments_selector,
+      objSource.category_selector
+    );
   }
 };
 
@@ -25,20 +32,16 @@ async function timeout(ms) {
 }
 
 /**
- *
- * @param {*} source
- * @param {*} summary_location
- * @param {*} content_location
- * @param {*} comments_location
- * @param {*} category_location
+ * @description Launches and iterates trough feed provided in source
+ * 
+ * @param {String} source             Url of the rss feed.
+ * @param {String} summary_location   DOM Selector string.
+ * @param {String} content_location   DOM Selector string.
+ * @param {String} comments_location  DOM Selector string.
+ * @param {String} category_location  DOM Selector string.
  */
-async function visitUrls(
-  source,
-  summary_location,
-  content_location,
-  comments_location,
-  category_location
-) {
+async function visitUrls(source, title_location,summary_location, content_location, comments_location, category_location) {
+  
   var parser = new Parser();
   var feed = await parser.parseURL(source);
 
@@ -46,15 +49,10 @@ async function visitUrls(
   var page = await browser.newPage();
 
   for (let i = 0; i < feed.items.length; i++) {
-    await inspectArticlePage(
-      page,
-      feed.items[i],
-      source,
-      summary_location,
-      content_location,
-      category_location
-    ).catch(err => console.log(err));
+    await inspectArticlePage(page, feed.items[i], source, title_location,summary_location, content_location, category_location)
+      .catch(err => console.log(err));
   }
+
   browser.close();
 }
 
@@ -69,41 +67,17 @@ async function visitUrls(
  * @param {*} category_location
  * @param {*} i
  */
-async function inspectArticlePage(
-  page,
-  article_rss,
-  source,
-  summary_location,
-  content_location,
-  category_location
-) {
+async function inspectArticlePage( page, article_rss, source, title_location,summary_location, content_location, category_location) {
   var promise = page.waitForNavigation({ waitUntil: "networkidle2" });
   await page.goto(article_rss.link);
-  await timeout(10000);
 
   var pubDate = new Date(article_rss.pubDate);
 
-  var link = await prepareLink(source, article_rss, page);
-  var title = await prepareTitle(source, article_rss, page);
-  var summary = await prepareSummary(
-    source,
-    article_rss,
-    page,
-    summary_location
-  );
-  var content = await prepareContent(
-    source,
-    article_rss,
-    page,
-    content_location
-  );
-  var category = await prepareCategory(
-    source,
-    article_rss,
-    page,
-    category_location
-  );
-  console.log('trying to add');
+  var link = await prepareLink(article_rss);
+  var title = await prepareTitle(page, title_location);
+  var summary = await prepareSummary(page, summary_location);
+  var content = await prepareContent(source, page, content_location);
+  var category = await prepareCategory(page, category_location);
   if (
     link.length > 0 &&
     title.length > 0 &&
@@ -112,18 +86,25 @@ async function inspectArticlePage(
     category.length > 0
   ) {
     await addNewArticle(source, link, title, summary, content, category, pubDate);
-  } {
-    console.log('failed to add' + category.length)
+  } else {
+    console.log('Could not add ' + link);
   }
   await promise;
 }
 
-async function prepareLink(source, article_rss, page) {
+async function prepareLink(article_rss) {
   return article_rss.link;
 }
 
-async function prepareTitle(source, article_rss, page) {
-  return article_rss.title;
+async function prepareTitle(page, title_location) {
+  var element = await page.$(title_location);
+  var title = await page.evaluate(
+    element => (element != null ? element.innerText.trim() : ""),
+    element
+  );
+  title = cleanString(title);
+  console.log('Title: '+title);
+  return title;
 }
 
 /**
@@ -132,7 +113,7 @@ async function prepareTitle(source, article_rss, page) {
  * @param {*} article_rss
  * @param {*} page
  */
-async function prepareSummary(source, article_rss, page, summary_location) {
+async function prepareSummary(page, summary_location) {
   var element = await page.$(summary_location);
   var summary = await page.evaluate(
     element => (element != null ? element.innerText.trim() : ""),
@@ -148,7 +129,7 @@ async function prepareSummary(source, article_rss, page, summary_location) {
  * @param {*} article_rss
  * @param {*} page
  */
-async function prepareContent(source, article_rss, page, content_location) {
+async function prepareContent(source, page, content_location) {
   switch (source) {
     case "https://www.delo.si/rss/":
       var element = await page.$(".itemFullText > .preview_text");
@@ -174,13 +155,11 @@ async function prepareContent(source, article_rss, page, content_location) {
  * @param {*} article_rss
  * @param {*} page
  */
-async function prepareCategory(source, article_rss, page, category_location) {
-  console.log(new Date())
-  console.log(article_rss.link)
+async function prepareCategory(page, category_location) {
   var element =
     category_location != "" ? await page.$(category_location) : null;
   var category = "";
-  
+
   category = await page.evaluate(
     element => (element != null ? element.innerText : ""),
     element
@@ -189,15 +168,11 @@ async function prepareCategory(source, article_rss, page, category_location) {
   category = cleanString(category);
   category = category.toLowerCase();
 
-  console.log('Categorie: ' + category);
-
-  for(var key in categoryDict.categories){
-    if(categoryDict.categories[key].includes(category)){
-      console.log(new Date())
+  for (var key in categoryDict.categories) {
+    if (categoryDict.categories[key].includes(category)) {
       return key;
-    } 
+    }
   }
-  console.log(new Date())
   return category;
 }
 
@@ -231,9 +206,29 @@ async function addNewArticle(
 }
 
 function cleanString(str) {
-  str = str.replace("\n\n", "");
-  str = str.replace("\n", "");
-  str = str.replace("\t", "");
+  str = str.replace("\n\n", " ");
+  str = str.replace("\n", " ");
+  str = str.replace("\t", " ");
   str = str.trim();
   return str;
+}
+
+
+module.exports.collectElementsFromWebpage = async function(source, page){
+
+  var sourceObj = sourcesDict.sources[source];
+
+  var link = page().url;
+  var title = await prepareTitle(page, sourceObj.title_selector);
+  var summary = await prepareSummary(page, sourceObj.summary_selector);
+  var content = await prepareContent(page, content_selector);
+  var category = await prepareCategory(page, category_selector);
+
+  return {
+    link: link,
+    title: title,
+    summary: summary,
+    content: content,
+    category: category
+  }
 }

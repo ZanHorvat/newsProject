@@ -58,10 +58,13 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-/* articleController.readArticles(); */
+// articleController.updateArticles();
+
+
 sourcesController.runChecks();
 setInterval(function() {
   sourcesController.runChecks();
 }, 10*60*1000);
+
 
 module.exports = app;

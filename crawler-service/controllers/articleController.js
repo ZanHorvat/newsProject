@@ -1,6 +1,11 @@
 var mongoose = require("mongoose");
+var puppeteer = require("puppeteer");
 var Article = mongoose.model("Article");
+var sourceController = require("./sourceController");
 var psl = require("psl");
+var http = require('http');
+var request = require('request');
+var sourcesDict = require("../dictionaries/sources");
 
 module.exports.evalArticle = async function(source, article) {
   console.log(source + ": " + article.title);
@@ -28,18 +33,38 @@ createArticle = function(article) {
   });
 };
 
-module.exports.readArticles = function() {
-  Article.find(function(err, docs) {
+module.exports.updateArticles = async function() {
+  Article.find(async function(err, docs) {
     if (err) {
       console.log(err);
     } else {
+
+      var browser = await puppeteer.launch();
+      var page = await browser.newPage();
+
       for (var i = 0; i < docs.length; i++) {
-        var url = docs[i].link;
-        console.log(psl.get(extractHostname(url))); // returns youtube.com
+        await updateArticle(page, docs[i]);
       }
+
+      browser.close();
     }
   });
 };
+
+async function updateArticle(page, doc){
+  
+  var promise = page.waitForNavigation({ waitUntil: "networkidle2" });
+  await page.goto(doc.link);
+
+  var originalUrl = new URL(doc.link);
+  var currentUrl = new URL(page.url());
+
+  
+
+  console.log(originalUrl.pathname === currentUrl.pathname);
+
+  await promise;
+}
 
 // https://stackoverflow.com/questions/8498592/extract-hostname-name-from-string
 function extractHostname(url) {
