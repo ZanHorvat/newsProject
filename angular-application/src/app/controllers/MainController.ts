@@ -18,17 +18,20 @@ import {
   providedIn: "root"
 })
 export class MainController {
-  public _url: string = "http://localhost:3000/";
-  public articles$: Observable<any[]> = this.getAllArticles().pipe(
-    shareReplay(1)
-  );
+
+  public _url: string = "http://localhost:3000/api/v1";
+
+  public articles$: Observable<any[]> = this.getAllArticles();
 
   constructor(public http: HttpClient) {}
 
   public getAllArticles(): Observable<Article[]> {
+
     return this.http.get<Article[]>(this._url).pipe(
       retry(1),
       catchError(this.handleError)
+    ).pipe(
+      shareReplay(1)
     );
   }
 

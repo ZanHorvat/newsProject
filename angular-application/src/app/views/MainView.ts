@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { MainController } from "../controllers/MainController";
+import { Router, ActivatedRoute } from '@angular/router';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -14,18 +15,26 @@ import { Article } from "../models/Article";
 })
 export class MainView implements OnInit {
   selectedArticle: Article;
+
+  call: any;
+
   constructor(private mMainController: MainController) {}
 
   Articles: any = [];
 
+
   ngOnInit() {
-    this.loadArticles();
+    //this.loadArticles();
   }
 
   loadArticles() {
-    return this.mMainController.articles$.subscribe((data: {}) => {
-      this.Articles = data;
-    });
+    this.mMainController.getAllArticles().subscribe(
+      (data) => {this.Articles = data},
+      (error) => {},
+      () => { console.log(this.Articles.length)}
+    );
+
+    this.ngOnInit();
   }
 
   getColor(category: String) {

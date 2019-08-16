@@ -17,9 +17,14 @@
           <hr class="hr" />
           <!-- Link -->
           <p class="card-text mb-4">
-            <a href="{{ article.link }}" class="black-text d-flex justify-content-end"
-              ><small>@{{ extractHostname(article.link) }}</small>
-            </a>
+            <a
+              href="{{ article.link }}"
+              class="d-flex justify-content-end btn btn-black"
+              ><small
+                >@{{ extractHostname(article.link) }}
+                <i class="fa fa-angle-double-right"></i
+              ></small>
+                </a>
           </p>
           <p class="card-text">
             <a
@@ -72,13 +77,17 @@
           </h4>
         </a>
         <strong>
-          {{
-            selectedArticle !== undefined ? selectedArticle.summary : ""
-          }}
+          {{ selectedArticle !== undefined ? selectedArticle.summary : "" }}
         </strong>
-        <a href="{{ selectedArticle !== undefined ? selectedArticle.link : '' }}" class="black-text d-flex justify-content-end">@{{
-          selectedArticle !== undefined ? extractHostname(selectedArticle.link) : ""
-        }}</a>
+        <a
+          href="{{ selectedArticle !== undefined ? selectedArticle.link : '' }}"
+          class="black-text d-flex justify-content-end"
+          >@{{
+            selectedArticle !== undefined
+              ? extractHostname(selectedArticle.link)
+              : ""
+          }}</a
+        >
         <!-- <div style="color: rgba(0, 0, 0, 0.5)">
           <hr class="hr-dark" />
           <a

@@ -3,7 +3,8 @@ import { Routes, RouterModule } from '@angular/router';
 import { MainView } from './views/MainView';
 
 const routes: Routes = [
-  { path: '', component: MainView }
+  { path: ':category', component: MainView },
+  { path: '**', component: MainView }
 ];
 
 @NgModule({

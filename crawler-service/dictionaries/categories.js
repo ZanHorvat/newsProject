@@ -1,6 +1,6 @@
 module.exports.categories = {
-  slovenija: ["slovenija", "lokalno"],
-  tujina: ["tujina", "svet", "s. in j. amerika", "ture avanture"],
+  slovenija: ["slovenija", "lokalno", "prekmurje", "ljubljana"],
+  tujina: ["tujina", "svet", "s. in j. amerika", "ture avanture", "evropa", "afrika", "tuja scena", "azija z oceanijo"],
   politika: ["politika"],
   gospodarstvo: ["gospodarstvo"],
   šport: [
@@ -16,7 +16,8 @@ module.exports.categories = {
     "avtomotošport",
     "košarka",
     "kolesarstvo",
-    "rokomet"
+    "rokomet",
+    "hokej"
   ],
   kultura: ["kultura", "glasba", "film"],
   "znanost in tehnologija": ["znanost in tehnologija"]
