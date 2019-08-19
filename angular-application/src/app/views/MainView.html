@@ -2,7 +2,7 @@
   <div class="container mb-4">
     <div class="card-columns">
       <!-- Card Dark -->
-      <div *ngFor="let article of Articles" class="card">
+      <div *ngFor="let article of Articles, let i = index; trackBy: customTB" class="card">
         <!-- Card content -->
         <div class="card-body lighten-4" [ngClass]="getColor(article.category)">
           <!-- Title -->
@@ -19,7 +19,7 @@
           <p class="card-text mb-4">
             <a
               href="{{ article.link }}"
-              class="d-flex justify-content-end btn btn-black"
+              class="d-flex justify-content-end black-text"
               ><small
                 >@{{ extractHostname(article.link) }}
                 <i class="fa fa-angle-double-right"></i
@@ -28,7 +28,6 @@
           </p>
           <p class="card-text">
             <a
-              href="#!"
               (click)="[basicModal.show(), selectArticle(article)]"
               class="black-text d-flex"
               ><small style="padding: 0.2rem"
@@ -65,7 +64,7 @@
           <span aria-hidden="true">×</span>
         </button>
         <h4 class="modal-title w-100 text-capitalize" id="myModalLabel">
-          {{ selectedArticle !== undefined ? selectedArticle.category : "" }}
+          {{ selectedArticle !== undefined ? customLetters(selectedArticle.category) : "" }}
         </h4>
       </div>
       <div class="modal-body">

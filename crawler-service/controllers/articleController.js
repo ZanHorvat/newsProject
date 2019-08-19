@@ -23,6 +23,10 @@ module.exports.evalArticle = async function(source, article) {
   });
 };
 
+module.exports.checkIfArticleExist = async function(url, callback){
+  
+}
+
 createArticle = function(article) {
   Article.create(article, function(err, article) {
     if (err) {

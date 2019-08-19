@@ -49,10 +49,10 @@ async function visitUrls(source, title_location,summary_location, content_locati
   var page = await browser.newPage();
 
   for (let i = 0; i < feed.items.length; i++) {
+    
     await inspectArticlePage(page, feed.items[i], source, title_location,summary_location, content_location, category_location)
-      .catch(err => console.log(err));
+        .catch(err => console.log(err));  
   }
-
   browser.close();
 }
 
@@ -230,5 +230,5 @@ module.exports.collectElementsFromWebpage = async function(source, page){
     summary: summary,
     content: content,
     category: category
-  }
+  };
 }

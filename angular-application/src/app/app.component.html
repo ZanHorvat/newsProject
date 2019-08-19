@@ -5,7 +5,7 @@
   <mdb-navbar-brand
     ><a
       class="navbar-brand"
-      href="#"
+      routerLink="/"
       style="font-family: 'Bree Serif', serif;"
       >{{ title }}</a
     ></mdb-navbar-brand
@@ -50,17 +50,13 @@
           >Znanost in tehnika</a
         >
       </li>
-
-      <li class="nav-item">
-        <a class="nav-link waves-light" routerLink="/ostalo" mdbWavesEffect
-          >Ostalo</a
-        >
-      </li>
     </ul>
     <!-- Links -->
 
     <!-- Search form -->
-    <button type="button" class="btn btn-light" (click)="refresh()"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+    <small class="white-text" >{{formatDate(updated)}}</small>
+    <button mdbBtn type="button" color="light-green" outline="true" size="sm" mdbWavesEffect (click)="refresh()"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+    
   </links>
   <!-- Collapsible content -->
 </mdb-navbar>

@@ -21,13 +21,13 @@ export class MainController {
 
   public _url: string = "http://localhost:3000/api/v1";
 
-  public articles$: Observable<any[]> = this.getAllArticles();
-
   constructor(public http: HttpClient) {}
 
-  public getAllArticles(): Observable<Article[]> {
+  public getAllArticles(category): Observable<Article[]> {
 
-    return this.http.get<Article[]>(this._url).pipe(
+    if(category == undefined) category = '';
+
+    return this.http.get<Article[]>(this._url + '/' + category).pipe(
       retry(1),
       catchError(this.handleError)
     ).pipe(

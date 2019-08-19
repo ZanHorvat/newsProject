@@ -3,7 +3,7 @@ module.exports.categories = {
   tujina: ["tujina", "svet", "s. in j. amerika", "ture avanture", "evropa", "afrika", "tuja scena", "azija z oceanijo"],
   politika: ["politika"],
   gospodarstvo: ["gospodarstvo"],
-  šport: [
+  sport: [
     "šport",
     "tenis",
     "nogomet",
@@ -17,8 +17,9 @@ module.exports.categories = {
     "košarka",
     "kolesarstvo",
     "rokomet",
-    "hokej"
+    "hokej",
+    "dirka po španiji"
   ],
-  kultura: ["kultura", "glasba", "film"],
-  "znanost in tehnologija": ["znanost in tehnologija"]
+  kultura: ["kultura", "glasba", "film", "iz sveta znanih"],
+  znanost: ["znanost in tehnologija"]
 };

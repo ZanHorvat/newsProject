@@ -1,6 +1,12 @@
-import { Component, OnInit } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  ChangeDetectorRef,
+  EventEmitter,
+  Input
+} from "@angular/core";
 import { MainController } from "../controllers/MainController";
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from "@angular/router";
 import {
   debounceTime,
   distinctUntilChanged,
@@ -8,6 +14,7 @@ import {
   map
 } from "rxjs/operators";
 import { Article } from "../models/Article";
+import { RefreshServiceService } from '../services/refresh-service.service';
 
 @Component({
   selector: "MainView",
@@ -18,23 +25,50 @@ export class MainView implements OnInit {
 
   call: any;
 
-  constructor(private mMainController: MainController) {}
+  constructor(
+    private mMainController: MainController,
+    private ref: ChangeDetectorRef,
+    private r: Router,
+    private refreshService: RefreshServiceService,
+    private activatedRoute: ActivatedRoute
+  ) {}
 
-  Articles: any = [];
-
+  @Input() Articles: any = [];
+  category: String;
 
   ngOnInit() {
-    //this.loadArticles();
+    this.refreshService.getRefresh().subscribe((value: boolean) => {
+      if (value) {
+        this.loadArticles();
+      }
+    });
+
+    this.activatedRoute.params.subscribe(params => {
+      this.category = params['category'];
+      this.loadArticles();
+    });
   }
 
-  loadArticles() {
-    this.mMainController.getAllArticles().subscribe(
-      (data) => {this.Articles = data},
-      (error) => {},
-      () => { console.log(this.Articles.length)}
+  async loadArticles() {
+    this.mMainController.getAllArticles(this.category).subscribe(
+      data => {
+        this.Articles = data;
+      },
+      error => {},
+      () => {
+        console.log(this.Articles);
+        new EventEmitter<Article>().emit();
+      }
     );
+  }
 
-    this.ngOnInit();
+  customTB(index, article) {
+    return `${index}-${article._id}`;
+  }
+
+  customLetters(category){
+    if(category == 'šport') return 'šport'
+    return category;
   }
 
   getColor(category: String) {
@@ -49,15 +83,19 @@ export class MainView implements OnInit {
         return "grey";
       case "gospodarstvo":
         return "blue-grey";
-      case "šport":
+      case "sport":
         return "lime";
       case "kultura":
         return "purple";
       case "znanost in tehnologija":
-        return "cyan"
+        return "cyan";
       default:
         return "grey";
     }
+  }
+
+  public trackItem(index: number, item: any) {
+    return item.trackId;
   }
 
   selectArticle(article: Article) {
