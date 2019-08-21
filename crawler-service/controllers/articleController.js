@@ -3,30 +3,36 @@ var puppeteer = require("puppeteer");
 var Article = mongoose.model("Article");
 var sourceController = require("./sourceController");
 var psl = require("psl");
-var http = require('http');
-var request = require('request');
+var http = require("http");
+var request = require("request");
 var sourcesDict = require("../dictionaries/sources");
 
+
+
+/**
+ * filterArticles prepares data for REST API, does not expose data which was collected for
+ * aggregation and grading purposes.
+ */
 module.exports.filterArticles = function(articles) {
-  
   var filtered_articles = [];
 
-  articles.forEach(function(article, index){
+  articles.forEach(function(article, index) {
     filtered_articles.push({
-      'link': article.link,
-      'title': article.title,
-      'summary': article.summary,
-      'category': article.category,
-      'connectedArticles': article.connectedArticles
-    })
+      link: article.link,
+      title: article.title,
+      summary: article.summary,
+      category: article.category,
+      connectedArticles: article.connectedArticles
+    });
   });
-  
+
   return filtered_articles;
-}
+};
 
-module.exports.evalArticle = async function(source, article) {
-  console.log(source + ": " + article.title);
-
+/**
+ * evalArticle looks at the link of given article and checks if it exists in database, if not it'll try to insert
+ */
+module.exports.evalArticle = async function(article) {
   Article.find({ link: article.link }, function(err, docs) {
     if (err) {
       console.log(err);
@@ -40,10 +46,9 @@ module.exports.evalArticle = async function(source, article) {
   });
 };
 
-module.exports.checkIfArticleExist = async function(url, callback){
-  
-}
-
+/**
+ * Classic mongoose create function, accepts Article look at models
+ */
 createArticle = function(article) {
   Article.create(article, function(err, article) {
     if (err) {
@@ -54,52 +59,7 @@ createArticle = function(article) {
   });
 };
 
-module.exports.updateArticles = async function() {
-  Article.find(async function(err, docs) {
-    if (err) {
-      console.log(err);
-    } else {
 
-      var browser = await puppeteer.launch();
-      var page = await browser.newPage();
 
-      for (var i = 0; i < docs.length; i++) {
-        await updateArticle(page, docs[i]);
-      }
 
-      browser.close();
-    }
-  });
-};
 
-async function updateArticle(page, doc){
-  
-  var promise = page.waitForNavigation({ waitUntil: "networkidle2" });
-  await page.goto(doc.link);
-
-  var originalUrl = new URL(doc.link);
-  var currentUrl = new URL(page.url());
-
-  console.log(originalUrl.pathname === currentUrl.pathname);
-
-  await promise;
-}
-
-// https://stackoverflow.com/questions/8498592/extract-hostname-name-from-string
-function extractHostname(url) {
-  var hostname;
-  //find & remove protocol (http, ftp, etc.) and get hostname
-
-  if (url.indexOf("//") > -1) {
-    hostname = url.split("/")[2];
-  } else {
-    hostname = url.split("/")[0];
-  }
-
-  //find & remove port number
-  hostname = hostname.split(":")[0];
-  //find & remove "?"
-  hostname = hostname.split("?")[0];
-
-  return hostname;
-}

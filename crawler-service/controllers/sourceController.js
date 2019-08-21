@@ -6,6 +6,8 @@ var puppeteer = require("puppeteer");
 var articleController = require("./articleController");
 var categoryDict = require("../dictionaries/categories");
 var sourcesDict = require("../dictionaries/sources");
+const pastHours = 12; // How old articles will be take into consideration
+
 
 module.exports.runChecks = async function(article) {
   // Check Rtvslo
@@ -50,7 +52,7 @@ async function visitUrls(source, title_location,summary_location, content_locati
 
   for (let i = 0; i < feed.items.length; i++) {
     
-    await inspectArticlePage(page, feed.items[i], source, title_location,summary_location, content_location, category_location)
+    await inspectArticlePage(page, feed.items[i].link, feed.items[i].pubDate)
         .catch(err => console.log(err));  
   }
   browser.close();
@@ -67,17 +69,26 @@ async function visitUrls(source, title_location,summary_location, content_locati
  * @param {*} category_location
  * @param {*} i
  */
-async function inspectArticlePage( page, article_rss, source, title_location,summary_location, content_location, category_location) {
+inspectArticlePage = async function(page, link, date) {
+  
   var promise = page.waitForNavigation({ waitUntil: "networkidle2" });
-  await page.goto(article_rss.link);
+  await page.goto(link).catch('Error getting website.');
 
-  var pubDate = new Date(article_rss.pubDate);
+  var pubDate = new Date(date);
+  var refSource = {}
+  var source = '';
 
-  var link = await prepareLink(article_rss);
-  var title = await prepareTitle(page, title_location);
-  var summary = await prepareSummary(page, summary_location);
-  var content = await prepareContent(source, page, content_location);
-  var category = await prepareCategory(page, category_location);
+  for (var host in sourcesDict.sources) {
+    if(link.includes(host)){
+      source = sourcesDict.sources[host].source; // rss link
+      refSource = sourcesDict.sources[host]; // object of host as host variable is a string
+    }
+  }
+
+  var title = await prepareTitle(page, refSource.title_selector);
+  var summary = await prepareSummary(page, refSource.summary_selector);
+  var content = await prepareContent(source, page, refSource.content_selector);
+  var category = await prepareCategory(page, refSource.category_selector);
   if (
     link.length > 0 &&
     title.length > 0 &&
@@ -85,7 +96,7 @@ async function inspectArticlePage( page, article_rss, source, title_location,sum
     content.length > 0 &&
     category.length > 0
   ) {
-    await addNewArticle(source, link, title, summary, content, category, pubDate);
+    await addNewArticle(link, title, summary, content, category, pubDate);
   } else {
     console.log('Could not add ' + link);
     console.log(source.length + ' ' + link.length + ' ' + title.length + ' ' + summary.length + ' ' + content.length + ' ' + category.length + ' ' + pubDate.length)
@@ -188,7 +199,6 @@ async function prepareCategory(page, category_location) {
  * @param {*} category
  */
 async function addNewArticle(
-  source,
   link,
   title,
   summary,
@@ -196,7 +206,7 @@ async function addNewArticle(
   category,
   pubDate
 ) {
-  await articleController.evalArticle(source, {
+  await articleController.evalArticle({
     link: link,
     title: title,
     summary: summary,
@@ -233,3 +243,79 @@ module.exports.collectElementsFromWebpage = async function(source, page){
     category: category
   };
 }
+
+// https://stackoverflow.com/questions/8498592/extract-hostname-name-from-string
+extractHostname = function(url) {
+  var hostname;
+  // find & remove protocol (http, ftp, etc.) and get hostname
+
+  if (url.indexOf("//") > -1) {
+    hostname = url.split("/")[2];
+  } else {
+    hostname = url.split("/")[0];
+  }
+
+  // find & remove port number
+  hostname = hostname.split(":")[0];
+  // find & remove "?"
+  hostname = hostname.split("?")[0];
+
+  hostname = hostname.replace("www.", "");
+
+  return hostname;
+}
+
+/** Looks at the page in the headless browser and checks difference
+ *  If it's not the same it recollects and updates the article in database
+ */
+async function updateArticle(page, doc) {
+  var promise = page.waitForNavigation({ waitUntil: "networkidle2" });
+  await page.goto(doc.link);
+
+  var originalUrl = new URL(doc.link);
+  var currentUrl = new URL(page.url());
+
+  if(originalUrl.pathname !== currentUrl.pathname){
+    console.log('Found difference');
+    Article.deleteOne(doc).exec(function(err){
+      if(err){
+        console.log('Could not removed')
+      } else {
+        console.log('Removed')
+      }
+    })
+    inspectArticlePage(page, page.url(), new Date());
+  }
+
+  await promise;
+}
+
+/**
+ * Opens headless browser and itterates through given Articles and attempts to visit given url
+ * It passes opened page and article object down to updateArticle
+ */
+visitArrayOfArticleWebpages = async function(docs) {
+  var browser = await puppeteer.launch();
+  var page = await browser.newPage();
+
+  for (var i = 0; i < docs.length; i++) {
+    await updateArticle(page, docs[i]).catch(e => console.log(e));
+  }
+
+  browser.close();
+};
+
+module.exports.updateArticles = async function(callback) {
+  var startDate = new Date();
+  startDate.setHours(startDate.getHours() - pastHours);
+
+  Article.find({ updated: { $gt: startDate } }, async function(err, docs) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(docs.length)
+      await visitArrayOfArticleWebpages(docs);
+      callback();
+    }
+  });
+};

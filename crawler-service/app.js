@@ -10,8 +10,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var sourcesRouter = require('./routes/sources');
 
-var sourcesController = require('./controllers/sourceController');
-var articleController = require('./controllers/articleController');
+var newsController = require('./controllers/newsController');
 
 var app = express();
 
@@ -58,13 +57,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-articleController.updateArticles();
-
-
-sourcesController.runChecks();
-setInterval(function() {
-  sourcesController.runChecks();
-}, 10*60*1000);
+newsController.syncNewsSources();
 
 
 module.exports = app;
