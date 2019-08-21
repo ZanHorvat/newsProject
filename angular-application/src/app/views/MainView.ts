@@ -56,7 +56,6 @@ export class MainView implements OnInit {
       },
       error => {},
       () => {
-        console.log(this.Articles);
         new EventEmitter<Article>().emit();
       }
     );
@@ -99,7 +98,6 @@ export class MainView implements OnInit {
   }
 
   selectArticle(article: Article) {
-    console.log(article);
     this.selectedArticle = article;
   }
 

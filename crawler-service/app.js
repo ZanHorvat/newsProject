@@ -58,7 +58,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// articleController.updateArticles();
+articleController.updateArticles();
 
 
 sourcesController.runChecks();

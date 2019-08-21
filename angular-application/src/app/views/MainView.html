@@ -2,7 +2,10 @@
   <div class="container mb-4">
     <div class="card-columns">
       <!-- Card Dark -->
-      <div *ngFor="let article of Articles, let i = index; trackBy: customTB" class="card">
+      <div
+        *ngFor="let article of Articles; let i = index; trackBy: customTB"
+        class="card"
+      >
         <!-- Card content -->
         <div class="card-body lighten-4" [ngClass]="getColor(article.category)">
           <!-- Title -->
@@ -24,9 +27,9 @@
                 >@{{ extractHostname(article.link) }}
                 <i class="fa fa-angle-double-right"></i
               ></small>
-                </a>
+            </a>
           </p>
-          <p class="card-text">
+          <p *ngIf="article != null && article.connectedArticles != null && article.connectedArticles.length > 0" class="card-text">
             <a
               (click)="[basicModal.show(), selectArticle(article)]"
               class="black-text d-flex"
@@ -64,10 +67,14 @@
           <span aria-hidden="true">×</span>
         </button>
         <h4 class="modal-title w-100 text-capitalize" id="myModalLabel">
-          {{ selectedArticle !== undefined ? customLetters(selectedArticle.category) : "" }}
+          {{
+            selectedArticle !== undefined
+              ? customLetters(selectedArticle.category)
+              : ""
+          }}
         </h4>
       </div>
-      <div class="modal-body">
+      <div class="modal-body m-2">
         <a
           target="_blank"
           href="{{ selectedArticle !== undefined ? selectedArticle.link : '' }}"
@@ -87,56 +94,35 @@
               : ""
           }}</a
         >
-        <!-- <div style="color: rgba(0, 0, 0, 0.5)">
-          <hr class="hr-dark" />
-          <a
-            target="_blank"
-            href="https://www.rtvslo.si/slovenija/nacelnica-si-zeli-da-bi-pripadniki-sv-za-ugovore-uporabljali-sluzbeno-pot/493988"
-            ><h5 class="black-text">
-              <strong>
-                Načelnica si želi, da bi pripadniki SV za ugovore uporabljali
-                službeno pot
-              </strong>
-            </h5>
-          </a>
-
-          <small>
-            Po pogovoru s Knovsom načelnica Generalštaba SV Alenka Ermenc
-            vsebine zaslišanja zaradi tajnosti ni pojasnjevala medijem, a
-            pričakovati je, da je člane komisije zanimala zlasti njena vloga pri
-            razrešitvi Mihe Škerbinca.
-          </small>
-          <a href="#!" class="black-text d-flex justify-content-end"
-            ><small>@rtvslo.si</small>
-          </a>
-          <hr class="hr-dark" />
-          <a
-            target="_blank"
-            href="https://www.24ur.com/novice/slovenija/ermenceva-si-zeli-da-bi-pripadniki-sv-za-ugovore-uporabljali-sluzbeno-pot.html"
-            ><h5 class="black-text">
-              <strong
-                >Ermenčeva si želi, da bi pripadniki SV za ugovore uporabljali
-                službeno pot
-              </strong>
-              <small><i class="fas fa-fire"></i></small></h5
-          ></a>
-          <small>
-            Knovs je končal pogovor z načelnico Generalštaba Slovenske vojske
-            (SV) Alenko Ermenc. Ta v izjavi za medije po zaslišanju ni
-            razkrivala vsebine pogovora. O ravnanju nekdanjega poveljnika
-            poveljstva sil Mihe Škerbinca je dejala le, da bi si želela, da bi
-            vsak pripadnik uporabljal službeno pot, ko gre za predloge in
-            ugovore na odločitve nadrejenih.
-          </small>
-          <a href="#!" class="black-text d-flex justify-content-end"
-            ><small>@24ur.com</small>
-          </a>
-        </div> -->
+        <div style="color: rgba(0, 0, 0, 0.5)">
+          <div *ngIf="selectedArticle">
+            <div *ngFor="let subarticle of selectedArticle.connectedArticles">
+              <hr class="hr-dark" />
+              <small
+                ><a target="_blank" href="{{ subarticle.link }}"
+                  ><h5 class="black-text">
+                    <strong>
+                      {{ subarticle.title }}
+                    </strong>
+                  </h5>
+                </a>
+                <a
+                  href="{{
+                    selectedArticle !== undefined ? selectedArticle.link : ''
+                  }}"
+                  class="black-text d-flex justify-content-end"
+                >
+                  @{{
+                    subarticle !== undefined
+                      ? extractHostname(subarticle.link)
+                      : ""
+                  }}</a
+                ></small
+              >
+            </div>
+          </div>
+        </div>
       </div>
-      <!-- <div class="modal-footer">
-        <button type="button" mdbBtn color="secondary" class="waves-light" aria-label="Close" (click)="basicModal.hide()" mdbWavesEffect><i class="fas fa-thumbs-up"></i></button>
-        <button type="button" mdbBtn color="primary" class="relative waves-light" mdbWavesEffect>Save changes</button>
-      </div> -->
     </div>
   </div>
 </div>

@@ -3,6 +3,7 @@ var router = express.Router();
 var mongoose = require("mongoose");
 var Article = mongoose.model("Article");
 var categoryDict = require("../dictionaries/categories");
+var articleController = require("../controllers/articleController");
 
 /* GET home page. */
 router.get("/", function(req, res, next) {
@@ -12,9 +13,9 @@ router.get("/", function(req, res, next) {
       res.json({});
     } else {
         res.status(200);
-        res.json(docs);
+        res.json(articleController.filterArticles(docs));
     }
-  }).sort([['updated', -1]]).limit(20);
+  }).sort([['updated', -1]]).limit(100);
 });
 
 router.get("/:category", function(req, res, next) {
@@ -38,10 +39,10 @@ router.get("/:category", function(req, res, next) {
       res.end();
     } else {
         res.status(200);
-        res.json(docs);
+        res.json(articleController.filterArticles(docs));
         res.end();
     }
-  }).sort([['updated', -1]]).limit(20);
+  }).sort([['updated', -1]]).limit(100);
 });
 
 module.exports = router;

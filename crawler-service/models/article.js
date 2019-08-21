@@ -6,16 +6,15 @@ var articleShema = new mongoose.Schema({
   summary: { type: String },
   content: { type: String },
   category: { type: String },
-  comments: Number,
-  sorted: { type: Boolean, default: false },
-  people: { type: [String] },
-  places: { type: [String] },
-  otherSubjects: { type: [String] },
   grade: { type: Number, default: 0 },
-  graded: Date,
   updated: Date,
   aggregated: Date,
-  mediaTag: String
+  connectedArticles: {
+    title: String,
+    link: String,
+    summary: String
+  },
+  show: Boolean
 });
 
 mongoose.model("Article", articleShema, "Articles");

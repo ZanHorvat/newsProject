@@ -54,8 +54,12 @@
     <!-- Links -->
 
     <!-- Search form -->
-    <small class="white-text" >{{formatDate(updated)}}</small>
+    <div class="float-right">
+      <small class="white-text" >{{formatDate(updated)}}</small>
     <button mdbBtn type="button" color="light-green" outline="true" size="sm" mdbWavesEffect (click)="refresh()"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+
+    </div>
+    
     
   </links>
   <!-- Collapsible content -->

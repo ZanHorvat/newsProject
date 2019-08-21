@@ -7,6 +7,23 @@ var http = require('http');
 var request = require('request');
 var sourcesDict = require("../dictionaries/sources");
 
+module.exports.filterArticles = function(articles) {
+  
+  var filtered_articles = [];
+
+  articles.forEach(function(article, index){
+    filtered_articles.push({
+      'link': article.link,
+      'title': article.title,
+      'summary': article.summary,
+      'category': article.category,
+      'connectedArticles': article.connectedArticles
+    })
+  });
+  
+  return filtered_articles;
+}
+
 module.exports.evalArticle = async function(source, article) {
   console.log(source + ": " + article.title);
 
@@ -62,8 +79,6 @@ async function updateArticle(page, doc){
 
   var originalUrl = new URL(doc.link);
   var currentUrl = new URL(page.url());
-
-  
 
   console.log(originalUrl.pathname === currentUrl.pathname);
 

@@ -88,6 +88,7 @@ async function inspectArticlePage( page, article_rss, source, title_location,sum
     await addNewArticle(source, link, title, summary, content, category, pubDate);
   } else {
     console.log('Could not add ' + link);
+    console.log(source.length + ' ' + link.length + ' ' + title.length + ' ' + summary.length + ' ' + content.length + ' ' + category.length + ' ' + pubDate.length)
   }
   await promise;
 }
