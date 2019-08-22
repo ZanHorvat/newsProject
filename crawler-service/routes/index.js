@@ -7,7 +7,7 @@ var articleController = require("../controllers/articleController");
 
 /* GET home page. */
 router.get("/", function(req, res, next) {
-  Article.find({}, function(err, docs) {
+  Article.find({'show': true}, function(err, docs) {
     if (err) {
       res.status(500);
       res.json({});
@@ -30,7 +30,7 @@ router.get("/:category", function(req, res, next) {
     return;
   }
 
-  var query = {'category': category};
+  var query = {'category': category, 'show': true};
 
   Article.find(query, function(err, docs) {
     if (err) {

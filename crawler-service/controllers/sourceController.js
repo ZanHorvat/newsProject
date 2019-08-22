@@ -6,7 +6,7 @@ var puppeteer = require("puppeteer");
 var articleController = require("./articleController");
 var categoryDict = require("../dictionaries/categories");
 var sourcesDict = require("../dictionaries/sources");
-const pastHours = 12; // How old articles will be take into consideration
+const pastHours = 48; // How old articles will be take into consideration
 
 
 module.exports.runChecks = async function(article) {
@@ -274,6 +274,8 @@ async function updateArticle(page, doc) {
 
   var originalUrl = new URL(doc.link);
   var currentUrl = new URL(page.url());
+
+  console.log(doc.updated)
 
   if(originalUrl.pathname !== currentUrl.pathname){
     console.log('Found difference');

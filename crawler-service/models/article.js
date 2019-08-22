@@ -8,7 +8,6 @@ var articleShema = new mongoose.Schema({
   category: { type: String },
   grade: { type: Number, default: 0 },
   updated: Date,
-  aggregated: Date,
   connectedArticles: {
     title: String,
     link: String,

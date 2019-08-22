@@ -81,7 +81,7 @@ def grade(article):
     print()
 
     print(article)
-    # myclient.find_one_and_update(article, {'$set': {'grade': calculated_grade, 'otherSubjects': interestingWords}})
+    myclient.find_one_and_update(article, {'$set': {'grade': calculated_grade}}, upsert=False)
 
     # print(len(text.pos_tags)/(len(tokens)))
 
@@ -98,7 +98,7 @@ def mainFunction():
 
     datetime2daysAgo = datetime.now() - timedelta(days=2);
     myquery = {'updated': {'$gt': datetime2daysAgo}}
-    results = myclient.find(myquery)
+    results = myclient.find({})
 
 
     groupArticles(results);
@@ -122,24 +122,31 @@ def groupArticles(results):
 
     cosine = (tfidf * tfidf.T).A
 
-    size = len(articles) - 1
+    size = len(articles_whole) - 1
 
     for y in range(0, size):
-
+        shouldBeShown = True;
         # Printing main article
+        print()
+        print(articles_whole[y])
         print(articles_whole[y].get("link") + ' ' + str(articles_whole[y].get("grade")))
 
         connectedArticles = []
 
         for x in range(0, size):
-            if cosine[y][x] > 0.7 and cosine[y][x] < 0.99:
+            if cosine[y][x] > 0.7 and cosine[y][x] < 0.99 and x != y:
 
                 # Preparing similar article
                 print('[' + str(round(cosine[y][x], 2)) + ' grade: ' + str(articles_whole[x].get("grade")) + ' ' + str(len(articles_whole[x].get("content")))+'] ' + articles_whole[x].get("title") + " " + articles_whole[x].get("link"))
-
                 connectedArticles.append({'title': articles_whole[x].get('title'), 'link': articles_whole[x].get("link"), 'summary': articles_whole[x].get("summary")})
 
-        myclient.find_one_and_update(articles_whole[y], {'$set': {'connectedArticles': connectedArticles}})
+                if(articles_whole[y].get("grade") < articles_whole[x].get("grade")):
+                    shouldBeShown = False
+                elif(articles_whole[y].get("grade") == articles_whole[x].get("grade") and articles_whole[y].get("updated") < articles_whole[x].get("updated")):
+                    shouldBeShown = False
+
+        print()
+        myclient.find_one_and_update(articles_whole[y], {'$set': {'connectedArticles': connectedArticles, 'show': shouldBeShown}})
 
 
 
