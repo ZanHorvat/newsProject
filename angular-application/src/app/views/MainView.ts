@@ -37,16 +37,30 @@ export class MainView implements OnInit {
   category: String;
 
   ngOnInit() {
-    this.refreshService.getRefresh().subscribe((value: boolean) => {
-      if (value) {
-        this.loadArticles();
-      }
-    });
 
     this.activatedRoute.params.subscribe(params => {
-      this.category = params['category'];
+      if(params['category']) {
+        if(params['category'] == 'prva'){
+          this.category = '';
+        } else {
+          this.category = params['category'];
+        }
+        
+      }
       this.loadArticles();
     });
+
+    if(this.refreshService){
+      this.refreshService.getRefresh().subscribe((value: boolean) => {
+        if (value) {
+          this.loadArticles()
+        }
+      });
+    }
+
+   
+
+    
   }
 
   async loadArticles() {

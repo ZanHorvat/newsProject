@@ -3,7 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { MainView } from './views/MainView';
 
 const routes: Routes = [
-  { path: '', component: MainView },
+  { path: '', redirectTo: '/prva', pathMatch: 'full' },
   { path: ':category', component: MainView },
 ];
 

@@ -96,9 +96,17 @@ inspectArticlePage = async function(page, link, date) {
     content.length > 0 &&
     category.length > 0
   ) {
-    await addNewArticle(link, title, summary, content, category, pubDate);
+
+    var url = new URL(link);
+
+    var articleUniqLink = 'https://' + url.hostname + url.pathname;
+
+    if(articleUniqLink){
+      await addNewArticle(articleUniqLink, title, summary, content, category, pubDate);
+    }
+    
   } else {
-    console.log('Could not add ' + link);
+    console.log('Could not add ' + articleUniqLink);
     console.log(source.length + ' ' + link.length + ' ' + title.length + ' ' + summary.length + ' ' + content.length + ' ' + category.length + ' ' + pubDate.length)
   }
   await promise;
@@ -269,14 +277,15 @@ extractHostname = function(url) {
  *  If it's not the same it recollects and updates the article in database
  */
 async function updateArticle(page, doc) {
-  var promise = page.waitForNavigation({ waitUntil: "networkidle2" });
-  await page.goto(doc.link);
+  var promise = page.waitForNavigation({ waitUntil: "networkidle2" }).catch(e => console.log(e));
+  doc.link
 
+  await page.goto(doc.link).catch();
+  
   var originalUrl = new URL(doc.link);
   var currentUrl = new URL(page.url());
 
-  console.log(doc.updated)
-
+  console.log('Compering: ' + originalUrl.pathname + ' ' + currentUrl.pathname)
   if(originalUrl.pathname !== currentUrl.pathname){
     console.log('Found difference');
     Article.deleteOne(doc).exec(function(err){
@@ -317,6 +326,7 @@ module.exports.updateArticles = async function(callback) {
     } else {
       console.log(docs.length)
       await visitArrayOfArticleWebpages(docs);
+      console.log(new Date());
       callback();
     }
   });

@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import {Router} from "@angular/router"
 import { HttpClient } from "@angular/common/http";
 import { Observable, throwError, of } from "rxjs";
 import { Article } from "../models/Article";
@@ -21,7 +22,7 @@ export class MainController {
 
   public _url: string = "http://localhost:3000/api/v1";
 
-  constructor(public http: HttpClient) {}
+  constructor(public http: HttpClient, private router: Router) {}
 
   public getAllArticles(category): Observable<Article[]> {
 
@@ -41,11 +42,13 @@ export class MainController {
     if (error.error instanceof ErrorEvent) {
       // Get client-side error
       errorMessage = error.error.message;
+
     } else {
       // Get server-side error
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
-    window.alert(errorMessage);
+    console.log(errorMessage);
+    
     return throwError(errorMessage);
   }
 }

@@ -13,7 +13,7 @@ var articleShema = new mongoose.Schema({
     link: String,
     summary: String
   },
-  show: Boolean
+  show: { type: Boolean, default: true }
 });
 
 mongoose.model("Article", articleShema, "Articles");

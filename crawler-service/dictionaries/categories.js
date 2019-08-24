@@ -1,6 +1,6 @@
 module.exports.categories = {
-  slovenija: ["slovenija", "lokalno", "prekmurje", "ljubljana"],
-  tujina: ["tujina", "svet", "s. in j. amerika", "ture avanture", "evropa", "afrika", "tuja scena", "azija z oceanijo"],
+  slovenija: ["slovenija", "lokalno", "prekmurje", "ljubljana", "maribor"],
+  tujina: ["tujina", "svet", "s. in j. amerika", "ture avanture", "evropa", "afrika", "tuja scena", "azija z oceanijo", "evropska unija"],
   politika: ["politika"],
   gospodarstvo: ["gospodarstvo"],
   sport: [
@@ -18,8 +18,13 @@ module.exports.categories = {
     "kolesarstvo",
     "rokomet",
     "hokej",
-    "dirka po španiji"
+    "dirka po španiji",
+    "drugi športi",
+    "preostali športi",
+    "sportal +",
+    "liga prvakov",
+    "borilni športi"
   ],
-  kultura: ["kultura", "glasba", "film", "iz sveta znanih"],
-  znanost: ["znanost in tehnologija"]
+  kultura: ["kultura", "glasba", "film", "iz sveta znanih", "knjige", "svet znanih", "znan obraz ima svoj glas"],
+  znanost: ["znanost in tehnologija", "avtomobilnost"]
 };

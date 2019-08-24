@@ -33,6 +33,7 @@ module.exports.filterArticles = function(articles) {
  * evalArticle looks at the link of given article and checks if it exists in database, if not it'll try to insert
  */
 module.exports.evalArticle = async function(article) {
+
   Article.find({ link: article.link }, function(err, docs) {
     if (err) {
       console.log(err);

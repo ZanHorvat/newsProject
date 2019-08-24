@@ -10,29 +10,51 @@ from nltk import word_tokenize, pos_tag, ne_chunk
 from sklearn.feature_extraction.text import TfidfVectorizer
 import lemmagen.lemmatizer
 from string import digits
-
 from lemmagen.lemmatizer import Lemmatizer
+from difflib import SequenceMatcher
+
+# preload dictionaries
+dict_names_si = open("dicts/names_si.txt", "r", encoding="utf8").read().split('\n')
+dict_surnames_si = open("dicts/surnames_si.txt", "r", encoding="utf8").read().split('\n')
+
+
 
 def setInterval(func, time):
     e = threading.Event()
     while not e.wait(time):
         func()
 
+def findInterestingWords(tokens):
 
-def clean(content):
-    content = content.replace('.', ' ')
-    content = content.replace(',', ' ')
-    content = content.replace('!', ' ')
-    content = content.replace('?', ' ')
-    content = content.replace(')', ' ')
-    content = content.replace('(', ' ')
-    content = content.replace('\'\'', ' ')
-    content = content.replace('&#96', ' ')
-    content = content.replace('-', ' ')
-    content = content.replace('\u0027', ' ')
+    interestingWords = []
+    for dvojica in tokens:
+        if (dvojica[1] in ['PROPN', 'CONJ', 'PUNCT', 'ADJ', 'NOUN', 'ADV'] \
+                and str(dvojica[0])[0].isupper())\
+                or dvojica[1] in dict_names_si\
+                or dvojica[1] in dict_surnames_si:
+            if(dvojica[0] not in interestingWords):
+                interestingWords.append(str(dvojica[0]))
+
+    return interestingWords
+
+def cleanAndTokanize(content):
+    """ Uses postaging function to clean return tuple of (merged text and)"""
+
+    cleaned = ""
+    text = Text(content, hint_language_code='sl')
+
+    tokens = []
+
+    for x in range(len(text.pos_tags)-1):
+        word = text.pos_tags[x]
+        if (len(word[0]) > 2):
+            cleaned += ' ' + word[0]
+            tokens.append(word)
+
     remove_digits = str.maketrans('', '', digits)
-    content = content.translate(remove_digits)
-    return re.sub("[!.?0-9]`", " ", content.strip())
+    cleaned = cleaned.translate(remove_digits)
+
+    return cleaned.lstrip(), tokens
 
 
 def grade(article):
@@ -42,119 +64,114 @@ def grade(article):
     if content == None:
         return ''
 
-    content = clean(content)
-    tokens = word_tokenize(content)
+    content, tokens = cleanAndTokanize(content)
+
+    new_content = removeStopWordsAndLemmatisation(tokens)
+
+    interestingWords = findInterestingWords(tokens)
+
+    calculated_grade = round(len(interestingWords)/len(tokens), 2)
+
+    myclient.find_one_and_update(article, {'$set': {'grade': calculated_grade}}, upsert=False)
+    # print(interestingWords)
+
+    return new_content
+
+def removeStopWordsAndLemmatisation(tokens):
+
     new_content = ""
 
     stop_words = set(stopwords.words('slovene'))
+    for tuple in tokens:
 
-    # print(content);
-
-    for x in tokens:
-
+        x = tuple[0]
+        # broken library / issue slovenian words have whitespaces behind
         x = x + ' '
+
         if x.lower() not in stop_words:
             x = x.strip()
             lemmatizer = Lemmatizer(dictionary=lemmagen.DICTIONARY_SLOVENE)
             lemmanizedWord = lemmatizer.lemmatize(x)
             new_content += lemmanizedWord + " "
 
-    interestingWords = []
-
-
-    text = Text(new_content, hint_language_code='sl')
-    for dvojica in text.pos_tags:
-
-        if(len(dvojica[0]) < 3):
-            text.pos_tags.remove(dvojica)
-
-        if(dvojica[1] in ['PROPN', 'CONJ', 'PUNCT', 'ADJ', 'NOUN', 'ADV'] and len(dvojica[0]) > 2 and str(dvojica[0])[0].isupper()):
-            # print(dvojica[0] + ' ' + dvojica[1])
-            if(dvojica[0] not in interestingWords ):
-                interestingWords.append(str(dvojica[0]))
-
-    calculated_grade = round(len(interestingWords)/len(text.pos_tags), 2)
-
-    print(str(len(content)) + ' -> ' + str(calculated_grade))
-    print(interestingWords)
-    # print(interestingWords)
-    print()
-
-    print(article)
-    myclient.find_one_and_update(article, {'$set': {'grade': calculated_grade}}, upsert=False)
-
-    # print(len(text.pos_tags)/(len(tokens)))
-
     return new_content
 
 
 def mainFunction():
 
-    print("Interval: " + str(datetime.now()))
+    startTime = datetime.now()
 
-    stop_words = set(stopwords.words('slovene'))
-    if ('komaj ' in stop_words):
-        print('Hey')
+    print("Start cycle: " + str(startTime))
 
-    datetime2daysAgo = datetime.now() - timedelta(days=2);
-    myquery = {'updated': {'$gt': datetime2daysAgo}}
-    results = myclient.find({})
+    nHours = 48
+    datetime2daysAgo = datetime.now() - timedelta(hours=nHours);
 
-
-    groupArticles(results);
-
-def groupArticles(results):
+    results = myclient.find({'updated': {'$gt': datetime2daysAgo}})
     articles = []
-    articles_whole = []
 
-    for x in results:
-        print(x.get("title"))
+    for article in results:
+        articles.append(article);
+    groupArticles(articles);
 
-        content = grade(x)
+    print("End cycle: In " + str(datetime.now() - startTime) + ' analyzed ' + str(len(articles)) + ' articles from the last ' + str(nHours) + ' hours.')
 
-        articles.append(content)
-        articles_whole.append(x)
+# Expects
+def groupArticles(articles):
+    """ groups similar articles adds """
 
-    vect = TfidfVectorizer()  # parameters for tokenization, stopwords can be passed
-    tfidf = vect.fit_transform(articles)
+    texts = articleContentToArray(articles)
 
-    print("TF-IDF vectors (each column is a document):\n{}\nRows:\n{}".format(tfidf.T.A, vect.get_feature_names()))
+    # parameters for tokenization, stopwords can be passed
+    vect = TfidfVectorizer() 
+    
+    if(len(texts)):
+        tfidf = vect.fit_transform(texts)
+    else:
+        return
 
     cosine = (tfidf * tfidf.T).A
 
-    size = len(articles_whole) - 1
+    size = len(articles) - 1
 
     for y in range(0, size):
         shouldBeShown = True;
-        # Printing main article
-        print()
-        print(articles_whole[y])
-        print(articles_whole[y].get("link") + ' ' + str(articles_whole[y].get("grade")))
+
+        aY = articles[y]
 
         connectedArticles = []
 
         for x in range(0, size):
-            if cosine[y][x] > 0.7 and cosine[y][x] < 0.99 and x != y:
 
-                # Preparing similar article
-                print('[' + str(round(cosine[y][x], 2)) + ' grade: ' + str(articles_whole[x].get("grade")) + ' ' + str(len(articles_whole[x].get("content")))+'] ' + articles_whole[x].get("title") + " " + articles_whole[x].get("link"))
-                connectedArticles.append({'title': articles_whole[x].get('title'), 'link': articles_whole[x].get("link"), 'summary': articles_whole[x].get("summary")})
+            aX = articles[x]
 
-                if(articles_whole[y].get("grade") < articles_whole[x].get("grade")):
+            if cosine[y][x] > 0.5 and x != y:
+
+                connectedArticles.append({'title': aX.get('title'), 'link': aX.get("link"), 'summary': aX.get("summary")})
+
+                if(aY.get("grade") < aX.get("grade")):
                     shouldBeShown = False
-                elif(articles_whole[y].get("grade") == articles_whole[x].get("grade") and articles_whole[y].get("updated") < articles_whole[x].get("updated")):
+                elif(aY.get("grade") == aX.get("grade") and aY.get("updated") < aX.get("updated")):
                     shouldBeShown = False
 
-        print()
-        myclient.find_one_and_update(articles_whole[y], {'$set': {'connectedArticles': connectedArticles, 'show': shouldBeShown}})
+        myclient.find_one_and_update(aY, {'$set': {'connectedArticles': connectedArticles, 'show': shouldBeShown}})
 
 
+def articleContentToArray(articles):
+    """ Gets content of each article sends it to grading and append cleaned text to array"""
+    texts = []
 
+    for article in articles:
+        content = grade(article)
+        texts.append(content)
+
+    return texts
 
 
 
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")["newsarticle"]["Articles"]
-
 mainFunction()
+setInterval(mainFunction, 10 * 60 * 1000)
 
-# setInterval(mainFunction, 5 * 60 * 1000)
+
+# print(clean('V Ljubljani je v streljanju umrla ena oseba, so sporočili ljubljanski policisti. "Danes nekaj po 19. uri je bila Policijska uprava Ljubljana obveščena o varnostnem dogodku na območju Bežigrada. Po do sedaj zbranih obvestilih so policisti ugotovili, da je za posledicami uporabe strelnega orožja umrla ena oseba," so sporočili policisti.'))
+
