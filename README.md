@@ -34,7 +34,7 @@ Operates on given given Mongo database groups and grades queried for the last 48
 Supported languages:
 - Slovene
 
-Data for `aggregation-service/dicts/names_is.txt` and `aggregation-service/dicts/surnames_is.txt` was collected at [Statistični urad Republike Slovenije](https://www.stat.si/statweb).
+Data for `aggregation-service/dicts/names_si.txt` and `aggregation-service/dicts/surnames_si.txt` and `aggregation-service/dicts/places_si.txt` was collected at [Statistični urad Republike Slovenije](https://www.stat.si/statweb).
 
 ## Angular Application (TypeScript 3.2.4)
 

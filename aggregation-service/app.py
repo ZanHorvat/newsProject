@@ -16,8 +16,7 @@ from difflib import SequenceMatcher
 # preload dictionaries
 dict_names_si = open("dicts/names_si.txt", "r", encoding="utf8").read().split('\n')
 dict_surnames_si = open("dicts/surnames_si.txt", "r", encoding="utf8").read().split('\n')
-
-
+dict_places_si = open("dicts/places_si.txt", "r", encoding="utf8").read().split('\n')
 
 def setInterval(func, time):
     e = threading.Event()
@@ -30,10 +29,13 @@ def findInterestingWords(tokens):
     for dvojica in tokens:
         if (dvojica[1] in ['PROPN', 'CONJ', 'PUNCT', 'ADJ', 'NOUN', 'ADV'] \
                 and str(dvojica[0])[0].isupper())\
-                or dvojica[1] in dict_names_si\
-                or dvojica[1] in dict_surnames_si:
+                or dvojica[0] in dict_names_si \
+                or dvojica[0] in dict_places_si \
+                or dvojica[0] in dict_surnames_si:
             if(dvojica[0] not in interestingWords):
                 interestingWords.append(str(dvojica[0]))
+
+    print(interestingWords)
 
     return interestingWords
 
