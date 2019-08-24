@@ -6,7 +6,7 @@ var puppeteer = require("puppeteer");
 var articleController = require("./articleController");
 var categoryDict = require("../dictionaries/categories");
 var sourcesDict = require("../dictionaries/sources");
-const pastHours = 48; // How old articles will be take into consideration
+const pastHours = 12; // How old articles will be take into consideration
 
 
 module.exports.runChecks = async function(article) {
@@ -42,7 +42,7 @@ async function timeout(ms) {
  * @param {String} comments_location  DOM Selector string.
  * @param {String} category_location  DOM Selector string.
  */
-async function visitUrls(source, title_location,summary_location, content_location, comments_location, category_location) {
+async function visitUrls(source) {
   
   var parser = new Parser();
   var feed = await parser.parseURL(source);

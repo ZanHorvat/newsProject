@@ -12,16 +12,21 @@ import lemmagen.lemmatizer
 from string import digits
 from lemmagen.lemmatizer import Lemmatizer
 from difflib import SequenceMatcher
+from threading import Timer
+from urllib.parse import urlparse
 
 # preload dictionaries
 dict_names_si = open("dicts/names_si.txt", "r", encoding="utf8").read().split('\n')
 dict_surnames_si = open("dicts/surnames_si.txt", "r", encoding="utf8").read().split('\n')
 dict_places_si = open("dicts/places_si.txt", "r", encoding="utf8").read().split('\n')
 
-def setInterval(func, time):
-    e = threading.Event()
-    while not e.wait(time):
+def setInterval(func, sec):
+    def func_wrapper():
+        setInterval(func, sec)
         func()
+    t = threading.Timer(sec, func_wrapper)
+    t.start()
+    return t
 
 def findInterestingWords(tokens):
 
@@ -35,7 +40,7 @@ def findInterestingWords(tokens):
             if(dvojica[0] not in interestingWords):
                 interestingWords.append(str(dvojica[0]))
 
-    print(interestingWords)
+    # print(interestingWords)
 
     return interestingWords
 
@@ -59,23 +64,28 @@ def cleanAndTokanize(content):
     return cleaned.lstrip(), tokens
 
 
-def grade(article):
-
+def prepareAndGradeArticle(article):
     content = article.get("content")
-
     if content == None:
         return ''
 
-    content, tokens = cleanAndTokanize(content)
+    tokens = []
+    new_content = ""
 
-    new_content = removeStopWordsAndLemmatisation(tokens)
+    if(article.get("grade") == 0):
+        print("Grading " + article.get("title") + ': ' + str(datetime.now()))
+        content, tokens = cleanAndTokanize(content)
 
-    interestingWords = findInterestingWords(tokens)
+        interestingWords = findInterestingWords(tokens)
+        calculated_grade = round(len(interestingWords) / len(tokens), 2)
 
-    calculated_grade = round(len(interestingWords)/len(tokens), 2)
+        new_content = removeStopWordsAndLemmatisation(tokens)
 
-    myclient.find_one_and_update(article, {'$set': {'grade': calculated_grade}}, upsert=False)
-    # print(interestingWords)
+        myclient.find_one_and_update(article, {'$set': {'grade': calculated_grade}}, upsert=False)
+    else:
+        print("Preparing " + article.get("title") + ': ' + str(datetime.now()))
+        tokens = word_tokenize(content)
+        new_content = removeStopWordsAndLemmatisation(tokens)
 
     return new_content
 
@@ -84,9 +94,11 @@ def removeStopWordsAndLemmatisation(tokens):
     new_content = ""
 
     stop_words = set(stopwords.words('slovene'))
-    for tuple in tokens:
-
-        x = tuple[0]
+    for token in tokens:
+        if type(token) == tuple:
+            x = token[0]
+        else:
+            x = token
         # broken library / issue slovenian words have whitespaces behind
         x = x + ' '
 
@@ -106,9 +118,9 @@ def mainFunction():
     print("Start cycle: " + str(startTime))
 
     nHours = 48
-    datetime2daysAgo = datetime.now() - timedelta(hours=nHours);
+    timepast = datetime.now() - timedelta(hours=nHours);
 
-    results = myclient.find({'updated': {'$gt': datetime2daysAgo}})
+    results = myclient.find({'updated': {'$gt': timepast}})
     articles = []
 
     for article in results:
@@ -116,13 +128,27 @@ def mainFunction():
     groupArticles(articles);
 
     print("End cycle: In " + str(datetime.now() - startTime) + ' analyzed ' + str(len(articles)) + ' articles from the last ' + str(nHours) + ' hours.')
+    Timer(600, mainFunction).start()
+
+def fromSameSource(aY, aX):
+    urlY = aY.get("link")
+    urlX = aX.get("link")
+
+    parsedUrlY = urlparse(urlY)
+    parsedUrlX = urlparse(urlX)
+
+    print("Compring sources: " + urlY + ' and ' + urlX)
+
+    return parsedUrlX.netloc == parsedUrlY.netloc
+
 
 # Expects
 def groupArticles(articles):
     """ groups similar articles adds """
-
+    startTime = datetime.now()
+    print("Collecting and grading ...")
     texts = articleContentToArray(articles)
-
+    print("collecting and grading done in " + str(datetime.now() - startTime))
     # parameters for tokenization, stopwords can be passed
     vect = TfidfVectorizer() 
     
@@ -146,13 +172,14 @@ def groupArticles(articles):
 
             aX = articles[x]
 
-            if cosine[y][x] > 0.5 and x != y:
+            if 0.6 < cosine[y][x] and x != y:
 
-                connectedArticles.append({'title': aX.get('title'), 'link': aX.get("link"), 'summary': aX.get("summary")})
+                if not (0.95 < cosine[y][x] and fromSameSource(aY, aX)):
+                    connectedArticles.append({'title': aX.get('title'), 'link': aX.get("link"), 'summary': aX.get("summary")})
 
-                if(aY.get("grade") < aX.get("grade")):
+                if aY.get("grade") < aX.get("grade"):
                     shouldBeShown = False
-                elif(aY.get("grade") == aX.get("grade") and aY.get("updated") < aX.get("updated")):
+                elif aY.get("grade") == aX.get("grade") and aY.get("updated") < aX.get("updated"):
                     shouldBeShown = False
 
         myclient.find_one_and_update(aY, {'$set': {'connectedArticles': connectedArticles, 'show': shouldBeShown}})
@@ -163,7 +190,7 @@ def articleContentToArray(articles):
     texts = []
 
     for article in articles:
-        content = grade(article)
+        content = prepareAndGradeArticle(article)
         texts.append(content)
 
     return texts
@@ -172,7 +199,8 @@ def articleContentToArray(articles):
 
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")["newsarticle"]["Articles"]
 mainFunction()
-setInterval(mainFunction, 10 * 60 * 1000)
+
+
 
 
 # print(clean('V Ljubljani je v streljanju umrla ena oseba, so sporočili ljubljanski policisti. "Danes nekaj po 19. uri je bila Policijska uprava Ljubljana obveščena o varnostnem dogodku na območju Bežigrada. Po do sedaj zbranih obvestilih so policisti ugotovili, da je za posledicami uporabe strelnega orožja umrla ena oseba," so sporočili policisti.'))
