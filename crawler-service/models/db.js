@@ -4,6 +4,8 @@ var dbURI = 'mongodb://localhost/newsarticle';
 
 mongoose.connect(dbURI, { useNewUrlParser: true, useCreateIndex: true });
 
+mongoose.set('useFindAndModify', false);
+
 mongoose.connection.on('connected', function() {
     console.log('Mongoose - is connected ' + dbURI + '\n');
 });

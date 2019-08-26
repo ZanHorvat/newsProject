@@ -32,15 +32,15 @@ def findInterestingWords(tokens):
 
     interestingWords = []
     for dvojica in tokens:
-        if (dvojica[1] in ['PROPN', 'CONJ', 'PUNCT', 'ADJ', 'NOUN', 'ADV'] \
-                and str(dvojica[0])[0].isupper())\
-                or dvojica[0] in dict_names_si \
-                or dvojica[0] in dict_places_si \
+        if (dvojica[1] in ['PROPN', 'NOUN', 'PUNCT'])\
+                or dvojica[0] in dict_names_si\
+                or dvojica[0] in dict_places_si\
                 or dvojica[0] in dict_surnames_si:
+
             if(dvojica[0] not in interestingWords):
                 interestingWords.append(str(dvojica[0]))
 
-    # print(interestingWords)
+    # print(tokens)
 
     return interestingWords
 
@@ -77,7 +77,13 @@ def prepareAndGradeArticle(article):
         content, tokens = cleanAndTokanize(content)
 
         interestingWords = findInterestingWords(tokens)
-        calculated_grade = round(len(interestingWords) / len(tokens), 2)
+
+        nTokens = len(tokens)
+
+        if(nTokens == 0):
+            nTokens = 1
+
+        calculated_grade = round(len(interestingWords) / nTokens, 2)
 
         new_content = removeStopWordsAndLemmatisation(tokens)
 
@@ -128,7 +134,7 @@ def mainFunction():
     groupArticles(articles);
 
     print("End cycle: In " + str(datetime.now() - startTime) + ' analyzed ' + str(len(articles)) + ' articles from the last ' + str(nHours) + ' hours.')
-    Timer(600, mainFunction).start()
+    Timer(10, mainFunction).start()
 
 def fromSameSource(aY, aX):
     urlY = aY.get("link")
@@ -172,7 +178,7 @@ def groupArticles(articles):
 
             aX = articles[x]
 
-            if 0.6 < cosine[y][x] and x != y:
+            if 0.5 < cosine[y][x] and x != y:
 
                 if not (0.95 < cosine[y][x] and fromSameSource(aY, aX)):
                     connectedArticles.append({'title': aX.get('title'), 'link': aX.get("link"), 'summary': aX.get("summary")})
@@ -199,9 +205,3 @@ def articleContentToArray(articles):
 
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")["newsarticle"]["Articles"]
 mainFunction()
-
-
-
-
-# print(clean('V Ljubljani je v streljanju umrla ena oseba, so sporočili ljubljanski policisti. "Danes nekaj po 19. uri je bila Policijska uprava Ljubljana obveščena o varnostnem dogodku na območju Bežigrada. Po do sedaj zbranih obvestilih so policisti ugotovili, da je za posledicami uporabe strelnega orožja umrla ena oseba," so sporočili policisti.'))
-

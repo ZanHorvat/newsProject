@@ -34,12 +34,23 @@ module.exports.filterArticles = function(articles) {
  */
 module.exports.evalArticle = async function(article) {
 
-  Article.find({ link: article.link }, function(err, docs) {
+  article.grade = 0;
+
+  Article.findOne({ link: article.link }, function(err, docs) {    
     if (err) {
       console.log(err);
     } else {
-      if (docs.length > 0) {
-        console.log("Already exists.\n");
+      if (docs) {
+        console.log(docs.title);
+        console.log('Article already exists\n');
+        if(docs.content > article.content){
+          console.log('Found difference in content length therfore updating article object')
+          article.grade = 0
+          Article.findOneAndUpdate({link: docs.link}, article, function(err, doc, res){
+            if(err) console.log(err)
+            if(docs) console.log('Article successfully updated.\n')
+          })
+        }
       } else {
         createArticle(article);
       }

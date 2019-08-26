@@ -85,7 +85,7 @@ inspectArticlePage = async function(page, link, date) {
     }
   }
 
-  var title = await prepareTitle(page, refSource.title_selector);
+  var title = await prepareTitle(page, refSource.title_selector).catch(e => console.log('Could not get title'));
   var summary = await prepareSummary(page, refSource.summary_selector);
   var content = await prepareContent(source, page, refSource.content_selector);
   var category = await prepareCategory(page, refSource.category_selector);
@@ -106,7 +106,7 @@ inspectArticlePage = async function(page, link, date) {
     }
     
   } else {
-    console.log('Could not add ' + articleUniqLink);
+    console.log('Could not add ' + link);
     console.log(source.length + ' ' + link.length + ' ' + title.length + ' ' + summary.length + ' ' + content.length + ' ' + category.length + ' ' + pubDate.length)
   }
   await promise;
@@ -123,7 +123,6 @@ async function prepareTitle(page, title_location) {
     element
   );
   title = cleanString(title);
-  console.log('Title: '+title);
   return title;
 }
 
@@ -285,7 +284,7 @@ async function updateArticle(page, doc) {
   var originalUrl = new URL(doc.link);
   var currentUrl = new URL(page.url());
 
-  console.log('Compering: ' + originalUrl.pathname + ' ' + currentUrl.pathname)
+  // console.log('Compering: ' + originalUrl.pathname + ' ' + currentUrl.pathname)
   if(originalUrl.pathname !== currentUrl.pathname){
     console.log('Found difference');
     Article.deleteOne(doc).exec(function(err){
@@ -295,7 +294,9 @@ async function updateArticle(page, doc) {
         console.log('Removed')
       }
     })
-    inspectArticlePage(page, page.url(), new Date());
+    await inspectArticlePage(page, page.url(), new Date());
+  } else {
+    await inspectArticlePage(page, page.url(), doc.updated);
   }
 
   await promise;
